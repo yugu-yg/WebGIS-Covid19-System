@@ -1,0 +1,346 @@
+﻿<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>新冠疫情webGIS系统</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/3.35/esri/css/esri.css">
+    <script src="https://js.arcgis.com/3.35/"></script>
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <link href="css/bootstrap-table/bootstrap-table.min.css" rel="stylesheet" />
+    <link href="css/style.css" rel="stylesheet" />
+    <link href="css/mapstyle.css" rel="stylesheet">
+    <link href="css/myStyle.css" rel="stylesheet">
+    <script>
+        var path = this.location.pathname.replace(/\/[^/]+$/, "");
+        dojoConfig = {
+            parseOnLoad: true,
+            packages: [{ //解释：require(["js/.."],function(){}) 中  js/ 即为 location的值
+                name: "js", //对应require引用包里的js
+                location: this.location.pathname.replace(/\/[^/]+$/, '') + "/js"
+            }]
+        };
+    </script>
+    <script type="text/javascript" src="js/jquery-1.12.4.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap-table/bootstrap-table.min.js"></script>
+    <script type="text/javascript" src="js/bootstrap-table/bootstrap-table-zh-CN.min.js"></script>
+    <script type="text/javascript" src="./data/data.json.js"></script>
+    <script src="static/require.js"></script>
+    <div class="headDiv" style="color:#ffffff;">基于WebGIS的新冠疫情数据可视化系统</div>
+    <div class="menuDiv">
+        <div class="menuItem"> <button style="width: 100%;height: 100%;background: #22A1E0;"
+                onclick="menuClickHandle()">空间查询</button></div>
+        <div class="menuItem"> <button style="width: 100%;height: 100%;background: #22A1E0;"
+                onclick="openWin()">周边疫情</button></div>
+        <div class="menuItem"> <button style="width: 100%;height: 100%;background: #22A1E0;"
+                onclick="mapPrintOutClickHandle()">地图导出</button></div>
+    </div>
+    <div id="yongxinmap" style="width:100%;height:946px;">
+    </div>
+    <div class="layerControlClass">
+        <div class="layerControlItem">图层控制</div>
+        <div class="layerControlItem"><input type="checkbox" name="category" id="checkboxxcqz" value="xcqz"
+                style="width: 14px; height: 14px;margin-right: 8px;" onclick="layerControlClick('xcqz')" />现存确诊专题图
+        </div>
+        <div class="layerControlItem"><input type="checkbox" name="category" id="checkboxqz" value="qz"
+                style="width: 14px; height: 14px;margin-right: 8px;" onclick="layerControlClick('qz')" />疫情确诊专题图 </div>
+        <div class="layerControlItem"><input type="checkbox" name="category" id="checkboxzy" value="zy"
+                style="width: 14px; height: 14px;margin-right: 8px;" onclick="layerControlClick('zy')" />疫情治愈专题图 </div>
+        <div class="layerControlItem"><input type="checkbox" name="category" id="checkboxsw" value="sw"
+                style="width: 14px; height: 14px;margin-right: 8px;" onclick="layerControlClick('sw')" />疫情死亡专题图 </div>
+        <div class="layerControlItem"><input type="checkbox" name="category" id="checkboxysbl" value="ysbl"
+                style="width: 14px; height: 14px;margin-right: 8px;" onclick="loadScatterPoints()" />宜昌确诊分布图</div>
+    </div>
+    <div class="toolBarDiv">
+        <div class="toolbatItem"> <button style="width: 100%;height: 100%;" onclick="toolClickHandle('1')">放大</button>
+        </div>
+        <div class="toolbatItem"> <button style="width: 100%;height: 100%;" onclick="toolClickHandle('2')">缩小</button>
+        </div>
+        <div class="toolbatItem"> <button style="width: 100%;height: 100%;" onclick="toolClickHandle('3')">平移</button>
+        </div>
+        <div class="toolbatItem"> <button style="width: 100%;height: 100%;" onclick="toolClickHandle('4')">首页</button>
+        </div>
+        <div class="toolbatItem"> <button style="width: 100%;height: 100%;" onclick="toolClickHandle('0')">置空</button>
+        </div>
+    </div>
+    <!--  //***底部菜单***-->
+    <div style="position:absolute; margin-left:20px;border: 1px;bottom:10px;right:10px;background-color:rgba(0,0,0,0)"
+        ;>
+        <a href="javascript:SHGIS.Showvce();" class="item">
+            <img id="vce" name="vce" src="imgs/map_up.png" style="width:60px;background-color:rgba(0,0,0,0);">
+        </a>
+        <a href="javascript:SHGIS.ShowImage();" class="item">
+            <img id="imgs" name="imgs" src="imgs/image_up.png" style="width:60px;background-color:rgba(0,0,0,0);">
+        </a>
+    </div>
+
+
+
+
+</head>
+
+<body>
+    <script type="text/javascript">
+        var SHGIS = {}; //全局变量集合
+        var isload = false; //加载卫星图
+        var vcemap, imgmap, label, menurtl, SHGIS_searchcurrent_id, SHGIS_searchcurrent_MINI;
+        var SearchBOXFT = "",
+            menusname;
+        var china_base;
+        $(function () {
+            SHGIS.Markers = {};
+            require([
+                "dojo/parser",
+                "dojo/dom",
+                "dojo/_base/connect",
+                "esri/TimeExtent",
+                "esri/dijit/TimeSlider",
+                "dojo/_base/array",
+                "dojo/on",
+                "esri/map",
+                "esri/geometry/Extent",
+                "esri/SpatialReference",
+                "esri/layers/ArcGISTiledMapServiceLayer",
+                "esri/layers/ArcGISDynamicMapServiceLayer",
+                "js/TDTLayer.js",
+                "js/TDTAnnoLayer.js",
+                "js/TDTImagesLayer.js",
+                "esri/layers/GraphicsLayer",
+                "esri/dijit/Scalebar",
+                "esri/toolbars/draw",
+                "esri/graphic",
+                "esri/symbols/PictureMarkerSymbol",
+                "esri/symbols/SimpleLineSymbol",
+                "esri/symbols/SimpleFillSymbol",
+                "esri/symbols/SimpleMarkerSymbol",
+                "esri/Color",
+                "esri/InfoTemplate",
+                "esri/tasks/QueryTask",
+                "esri/tasks/query",
+                "esri/tasks/FindTask",
+                "esri/tasks/FindParameters",
+                "esri/tasks/RouteTask",
+                "esri/tasks/RouteParameters",
+                "esri/tasks/FeatureSet",
+                "esri/tasks/GeometryService",
+                "esri/symbols/Font",
+                "esri/toolbars/navigation",
+                "esri/symbols/TextSymbol",
+                "esri/tasks/LengthsParameters",
+                "esri/geometry/Point",
+                "esri/geometry/Polyline",
+                "esri/tasks/AreasAndLengthsParameters",
+                "esri/layers/WebTiledLayer",
+                "esri/dijit/OverviewMap",
+                "esri/geometry/webMercatorUtils",
+                "esri/basemaps",
+                "dojo/dom-attr",
+                "dojo/number",
+                "dojo/domReady!"
+            ],
+                function (parser, dom, connect, TimeExtent, TimeSlider, array, on,
+                    Map, Extent, SpatialReference, ArcGISTiledMapServiceLayer,
+                    ArcGISDynamicMapServiceLayer,
+                    TDTLayer, TDTAnnoLayer, TDTImagesLayer,
+                    GraphicsLayer, Scalebar, draw, graphic, PictureMarkerSymbol,
+                    SimpleLineSymbol, SimpleFillSymbol, SimpleMarkerSymbol, Color, InfoTemplate,
+                    QueryTask, Query, FindTask, FindParameters,
+                    RouteTask, RouteParameters, FeatureSet, GeometryService, Font,
+                    navigation, TextSymbol, LengthsParameters, Point, Polyline,
+                    AreasAndLengthsParameters, WebTiledLayer, OverviewMap, webMercatorUtils, basemaps, domattr, number
+                ) {
+                    parser.parse();
+                    SHGIS.extent = new Extent("110.88105058092977,  23.008731964879 120.05775826022573 40.192596499610453", new SpatialReference({
+                        wkid: 4490
+                    }));
+                    basemaps.delorme = {
+                        baseMapLayers: [{
+                            url: "http://123.15.42.106:6080/arcgis/rest/services/sqbdc/test_china/MapServer"
+                        }],
+                        thumbnailUrl: "",
+                        title: "china"
+                    };
+                    SHGIS.mapOptions = {
+                        basemap: "delorme",
+                        force3DTransforms: true,
+                        optimizePanAnimation: true,
+                        slider: false,
+                        zoom: 3,
+                        center: [110.24, 35.25], 
+                        title: "",
+                    };
+                    vcemap = new TDTLayer();
+                    imgmap = new TDTImagesLayer();
+                    label = new TDTAnnoLayer();
+                    china_base = new ArcGISDynamicMapServiceLayer("http://123.15.42.106:6080/arcgis/rest/services/sqbdc/test_china/MapServer", {
+                        id: "china_base"
+                    })
+                    SHGIS.map = new Map("yongxinmap", SHGIS.mapOptions);
+                    SHGIS.map.removeAllLayers();
+                    SHGIS.Showvce();
+                });
+        });
+
+        //影像地图
+        SHGIS.ShowImage = function () {
+            isload = true;
+            SHGIS.map.removeAllLayers();
+            SHGIS.map.addLayer(imgmap);
+            SHGIS.map.addLayer(label);
+        };
+
+        //矢量地图
+        SHGIS.Showvce = function () {
+            isload = false;
+            SHGIS.map.removeAllLayers();
+            SHGIS.map.on("zoom-end", function () {
+                if (isload == false) {
+                    if (SHGIS.map.getZoom() > 15) {
+                        SHGIS.map.addLayer(vcemap);
+                        SHGIS.map.addLayer(label);
+                        SHGIS.map.addLayer(china_base);
+                        isload == true;
+                    }
+                }
+            });
+            SHGIS.map.addLayer(vcemap);
+            SHGIS.map.addLayer(label);
+            SHGIS.map.addLayer(china_base);
+        };
+    </script>
+    <script>
+        let navToolbar = null
+        toolClickHandle = function (item) {
+            require([
+                "esri/map", "esri/toolbars/navigation", "esri/geometry/Point", "esri/SpatialReference", "dojo/domReady!"
+            ], function (Map, Navigation, Point, SpatialReference) {
+                if (navToolbar === null) {
+                    navToolbar = new Navigation(SHGIS.map);
+                }
+
+                navToolbar.deactivate()
+                if (item === '1') {
+                    navToolbar.activate(Navigation.ZOOM_IN)
+                    return;
+                }
+                if (item === '2') {
+                    navToolbar.activate(Navigation.ZOOM_OUT)
+                    return;
+                }
+                if (item === '3') {
+                    navToolbar.activate(Navigation.PAN)
+                    return;
+                }
+                if (item === '4') {
+                    var point = new Point([110.24, 35.25], new SpatialReference({
+                        wkid: 4326
+                    }));
+                    SHGIS.map.centerAndZoom(point, 3)
+                    return;
+                }
+                if (item === '0') {
+                    navToolbar.deactivate()
+                    SHGIS.map.graphics.clear();
+                    if (SHGIS.map.getLayer('chinafeatureLayer')) {
+                        SHGIS.map.removeLayer(SHGIS.map.getLayer('chinafeatureLayer'))
+                    }
+                    return;
+                }
+
+            });
+        }
+
+        layerControlClick = function (item) {
+            if (document.getElementById('checkbox' + item)) {
+                var current = document.getElementById('checkbox' + item)
+                if (current.checked) {
+                    require(["esri/layers/ArcGISDynamicMapServiceLayer",], function (ArcGISDynamicMapServiceLayer) {
+                        var url = "	http://123.15.42.106:6080/arcgis/rest/services/sqbdc/test_" + current.value + "/MapServer";
+                        var currentLayer = new ArcGISDynamicMapServiceLayer(url, {
+                            id: item
+                        })
+
+                        SHGIS.map.addLayer(currentLayer);
+                    })
+                } else {
+                    if (SHGIS.map.getLayer(item)) {
+                        SHGIS.map.removeLayer(SHGIS.map.getLayer(item))
+                    }
+                }
+            }
+        }
+
+        menuClickHandle = function () {
+            require(["esri/layers/FeatureLayer", "esri/InfoTemplate"], function (FeatureLayer, InfoTemplate) {
+                if (SHGIS.map.getLayer('chinafeatureLayer') === undefined) {
+                    var infoTemplate = new InfoTemplate("${provinceSh}");
+                    var featureLayer = new FeatureLayer("http://123.15.42.106:6080/arcgis/rest/services/sqbdc/test_china/MapServer/0", {
+                        id: 'chinafeatureLayer',
+                        mode: FeatureLayer.MODE_ONDEMAND,
+                        infoTemplate: infoTemplate,
+                        outFields: ["*"],
+                        opacity: 0.1,
+
+                    });
+                    infoTemplate.setContent("现存确诊: ${currentCon}<br>确诊数量: ${confirmedC}<br>疑似数量: ${suspectedC}<br>治愈数量: ${curedCount}<br>死亡数量: ${deadCount}<br>");
+                    SHGIS.map.addLayer(featureLayer);
+                }
+
+            })
+        }
+        openWin= function() {
+            window.open("./search.html", "newwindow")
+        }
+
+        loadScatterPoints = function () {
+            require(["esri/geometry/Point", "esri/SpatialReference", "esri/symbols/SimpleMarkerSymbol", "esri/graphic", "esri/symbols/SimpleLineSymbol", "esri/Color",], function (Point, SpatialReference, SimpleMarkerSymbol, Graphic, SimpleLineSymbol, Color) {
+                var simpleMarkerSymbol = new SimpleMarkerSymbol(SimpleMarkerSymbol.STYLE_CIRCLE, 4,
+                    new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,
+                        new Color([255, 0, 0]), 1),
+                    new Color([255, 0, 0]));
+                yqData.map(item => {
+                    var point = new Point(item.longitude, item.latitude, new SpatialReference({
+                        wkid: 4326
+                    }));
+                    var graphic = new Graphic(point, simpleMarkerSymbol);
+
+                    SHGIS.map.graphics.add(graphic);
+                })
+
+                var point = new Point([111.5, 30.75], new SpatialReference({
+                    wkid: 4326
+                }));
+                SHGIS.map.centerAndZoom(point, 8)
+
+            })
+        }
+
+        mapPrintOutClickHandle = function () {
+            require(["esri/tasks/PrintTask", "esri/tasks/PrintTemplate", "esri/tasks/PrintParameters"], function (PrintTask, PrintTemplate, PrintParameters,) {
+                var url = 'http://123.15.42.106:6080/arcgis/rest/services/Utilities/PrintingTools/GPServer/Export%20Web%20Map%20Task';
+                var printTask = new PrintTask(url);
+
+                var template = new PrintTemplate();
+                template.exportOptions = {
+                    width: 500,
+                    height: 400,
+                    dpi: 96
+                };
+                template.format = "PDF";
+                template.layout = "MAP_ONLY";
+                template.preserveScale = false;
+                var params = new PrintParameters();
+                params.map = SHGIS.map;
+                params.template = template;
+                alert('地图正在导出，请稍后……')
+                printTask.execute(params, function (evt) {
+                    window.open(evt.url, "_blank");
+                });
+            });
+        }
+    </script>
+
+</body>
+
+</html>

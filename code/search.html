@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>周边疫情信息查询</title>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden
+        }
+
+        p {
+            margin: 0
+        }
+
+        ul {
+            margin: 0;
+            padding: 0
+        }
+
+        li {
+            list-style-type: none
+        }
+
+        h3 {
+            font-size: 1.5em;
+            margin: .2em 0
+        }
+
+        img {
+            width: 100%
+        }
+
+        #map {
+            width: 100%;
+            height: 100%
+        }
+
+        #search {
+            width: calc(100% - 118px);
+            height: 24px;
+            margin-left: 85px;
+            margin-top: 12px;
+            padding: 0 9px;
+            font-size: 18px;
+            line-height: 24px;
+            border: none
+        }
+
+        #search:focus {
+            outline: 0
+        }
+
+        #result {
+            width: 100%;
+            padding: 0 9px;
+            background-color: #fff
+        }
+
+        .auto-item {
+            padding-left: 0;
+            padding-right: 0
+        }
+
+        .popup {
+            width: 240px;
+            font-size: 12px
+        }
+
+        header {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            width: calc(100% - 20px);
+            border-radius: 3px;
+            overflow: hidden;
+            z-index: 2000
+        }
+
+        .notice {
+            width: 240px;
+            font-size: 12px
+        }
+
+        strong {
+            font-size: 1.2em;
+            color: #f75c2f
+        }
+
+        .notice img {
+            margin: 10px 0
+        }
+
+        .amap-icon img,
+        .amap-marker-content img {
+            width: 25px;
+            height: 34px
+        }
+
+        .amap-info-close {
+            right: 5px !important
+        }
+
+        .search {
+            height: 48px;
+            background-color: #fff
+        }
+
+        .logo {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            height: 25px;
+            width: auto;
+            padding-right: 10px;
+            border-right: 1px solid #999
+        }
+
+        .nav {
+            position: fixed;
+            z-index: 3000;
+            bottom: 60px;
+            width: 150px;
+            height: 60px;
+            padding: 0 30px;
+            border-radius: 60px;
+            background-color: #fff;
+            right: 10px;
+            bottom: 10px;
+        }
+
+        .nav li {
+            display: inline-block;
+            margin-left: 10px;
+        }
+
+        .nav a {
+            display: block;
+            font-size: 12px;
+            color: #333;
+            text-decoration: none
+        }
+
+        .nav img {
+            display: block;
+            width: auto;
+            height: 24px;
+            padding: 10px 0 2px 0;
+            margin: 0 auto
+        }
+
+        .nav span {
+            display: block;
+            text-align: center
+        }
+
+        .nav,
+        header {
+            box-shadow: 0 8px 16px 0 rgba(153, 153, 153, .2)
+        }
+
+        .amap-logo {
+            display: block !important
+        }
+
+        /* .amap-marker>.amap-marker-content>div{
+            background-size: cover;
+        } */
+    </style>
+</head>
+
+<body>
+    <header>
+        <section class="search">
+            <img class="logo" src="./imgs/fight.png" />
+            <input id="search" type="text" placeholder="输入地址查看周边疫情" />
+        </section>
+        <section id="result"></section>
+    </header>
+    <main id="map"></main>
+    <script
+        src="https://webapi.amap.com/maps?v=1.4.15&key=146f101e824accd6956eeec4937c1a05&plugin=Map3D,AMap.Autocomplete,AMap.Geolocation,AMap.Geocoder,AMap.MarkerClusterer"></script>
+</body>
+<script>
+
+    var cluster = null;
+    var ncovData = [];
+    var markers = [];
+    // 创建地图
+    var map = new AMap.Map('map', {
+        zoom: 13,
+        center: [121.466298, 31.227778]
+    });
+    map.setMapStyle('amap://styles/7fc84fcd90c5c82c989cfb8e4f6a11bc');
+    var geo = new AMap.Geocoder()
+
+    window.onload = function () {
+        var date = new Date;
+
+        // 
+        fetch("https://assets.cbndata.org/2019-nCoV/data.json?ncovData=" + (new Date).getTime()).then(function (res) {
+            return res.json()
+        }).then(function (result) {
+            var data = result.data;
+            ncovData = result.data
+            // console.log(JSON.stringify(ncovData))
+            renderCluster(ncovData);
+
+            var o = "./imgs/blue.png"
+            var r = ["#f75c2f", "#007afc"];
+            var a = '注意做好自身防护。<p><img src="'.concat("./imgs/fight.png", '" /></p>')
+            var c = {
+                marker: new AMap.Pixel(-13, -30),
+                info: new AMap.Pixel(0, -20),
+                notification: new AMap.Pixel(0, -35)
+            }
+                , s = {}
+
+                , geo = new AMap.Geocoder()
+                , infoWin = new AMap.InfoWindow({
+                    offset: c.notification
+                })
+                , p = new AMap.InfoWindow({
+                    offset: c.info
+                })
+                , f = new AMap.Marker({
+                    icon: o,
+                    offset: c.marker
+                }).on("click", function () {
+                    infoWin.open(map);
+                });
+            map.add([f, infoWin]);
+            var g = [1e3, 3e3].map(function (e, n) {
+                return new AMap.Circle({
+                    radius: e,
+                    strokeColor: r[n],
+                    fillColor: r[n],
+                    strokeOpacity: 0.2,
+                    strokeWeight: 3,
+                    fillOpacity: 0.05,
+                    bubble: !0
+                });
+            });
+            map.add(g);
+
+            var geolocation = new AMap.Geolocation({
+                buttonOffset: new AMap.Pixel(10, 20),
+                zoomToAccuracy: !0,
+                buttonPosition: "RB"
+            });
+
+            function geoHandler(e) {
+                switch (e.type) {
+                    case "select":
+                        !(function (e, n) {
+                            var ncovData = e.poi
+                                , o = ncovData.location
+                                , i = ncovData.address;
+                            o ? geo.getAddress(o, function (e, ncovData) {
+                                var i = ncovData.regeocode.addressComponent
+                                    , r = i.province
+                                    , a = i.city
+                                    , c = i.district;
+                                n({
+                                    location: o,
+                                    province: r,
+                                    city: a,
+                                    district: c
+                                });
+                            }) : geo.getLocation(i, function (e, ncovData) {
+                                var o = _slicedToArray(ncovData.geocodes, 1)
+                                    , i = o[0]
+                                    , r = i.location
+                                    , a = i.addressComponent
+                                    , c = a.province
+                                    , s = a.city
+                                    , map = a.district;
+                                n({
+                                    location: r,
+                                    province: c,
+                                    city: s,
+                                    district: map
+                                });
+                            });
+                        }
+                        )(e, function (e) {
+                            centerToPosition(e),
+                                showInfo(e);
+                        });
+                        break;
+                    case "complete":
+                        var n = e.position
+                            , ncovData = e.addressComponent
+                            , o = {
+                                location: n,
+                                province: ncovData.province,
+                                city: ncovData.city,
+                                district: ncovData.district
+                            };
+                        centerToPosition(o);
+                        showInfo(o);
+                }
+            }
+            function centerToPosition(e) {
+                var p = e.location
+                    , ncovData = e.location
+                    , lng = ncovData.lng
+                    , lat = ncovData.lat;
+                f.setPosition(p);
+                map.setCenter([lng, lat + 0.005]);
+                g.forEach(function (e) {
+                    return e.setCenter(p);
+                });
+            }
+            function showInfo(e) {
+                var n = e.location;
+                infoWin.setContent(M(e)),
+                    infoWin.setPosition(n),
+                    infoWin.open(map);
+            }
+            function M(n) {
+                if (n.address) {
+                    var o = ["<strong>".concat(n.address, "</strong> "), n.count > 0 ? "曾出现 <strong>".concat(n.count, "</strong> 例新型冠状病毒肺炎确诊病例") : "此处发现疫情。"];
+                    return '<div class="popup"><p>'.concat(o.join(""), "。注意做好自身防护。</p></div>")
+                }
+                var i = ncovData.filter(function (e) {
+                    var ncovData = e.province
+                        , o = e.city
+                        , i = e.district;
+                    return n.province == ncovData && (n.city == o || n.district == i)
+                })
+                    , r = i.filter(function (e) {
+                        return !e.longitude
+                    }).filter(function (e) {
+                        var ncovData = e.district;
+                        return n.district == ncovData
+                    })[0] || i[i.length - 1]
+                    , c = [0, 0];
+                g.forEach(function (e) {
+                    return e.setCenter(n.location)
+                });
+                var s = ncovData.filter(function (e) {
+                    return e.longitude && (n.city ? e.city == n.city : e.province == n.province)
+                }).map(function (e) {
+                    var ncovData = e.longitude
+                        , o = e.latitude;
+                    return e.distance = AMap.GeometryUtil.distance([ncovData, o], n.location),
+                        g.forEach(function (n, i) {
+                            n.contains(new AMap.LngLat(ncovData, o)) && (c[i] = c[i] + parseInt(e.count))
+                        }),
+                        e
+                }).sort(function (e, n) {
+                    return n.distance - e.distance;
+                }).pop()
+                    , map = ["你所在的 <strong>".concat([r.province, r.city, r.district].join(""), "</strong> "), "目前已有 <strong>".concat(r.count, "</strong> 起新型冠状病毒肺炎确诊病例。")];
+                return s && (map = map.concat(["离你最近的在 <strong>".concat(s.address, "</strong>，"), "距离你 <strong>".concat(s.distance > 100 ? (s.distance / 1e3).toFixed(2) : parseInt(s.distance), "</strong> ").concat(s.distance > 100 ? "公里" : "米", "。"), 0 != c.reduce(function (e, n) {
+                    return e + n
+                }) ? "1 公里内".concat(c[0] > 0 ? "有 <strong>".concat(c[0], "</strong> 个病例") : c[0] < 0 ? "发现疫情。" : "没有病例", "，3 公里内").concat(c[1] > 0 ? "有 <strong>".concat(c[1], "</strong> 个病例") : c[1] < 0 ? "发现疫情。" : "没有病例", "。") : ""])),
+                    '<div class="notice"><h3>周边疫情</h3><p>'.concat(map.join("") + a, '</p><p style="color: #999">统计截至 ').concat(date.getFullYear(), "-").concat(date.getMonth() + 1, "-").concat(date.getDate(), " ").concat(date.getHours(), ":").concat(date.getMinutes(), ":").concat(date.getSeconds(), "</p></div>")
+            }
+            geolocation.getCurrentPosition(),
+                AMap.event.addListener(geolocation, "complete", geoHandler),
+                AMap.event.addListener(geolocation, "error", geoHandler),
+
+                //输入提示
+                AMap.event.addListener(new AMap.Autocomplete({
+                    datatype: "poi",
+                    input: "search",
+                    output: "result"
+                }), "select", function (event) {
+                    console.log(event)
+                    geoHandler(event)
+                });
+
+        });
+
+    }
+
+    function renderCluster(points) {
+        for (var i = 0; i < points.length; i += 1) {
+            if ([points[i]['longitude']] && points[i]['latitude']) {
+                markers.push(new AMap.Marker({
+                    position: [points[i]['longitude'] - 0, points[i]['latitude'] - 0],
+                    content: '<div style="background-color: hsla(180, 100%, 50%, 0.7); height: 24px; width: 24px; border: 1px solid hsl(180, 100%, 40%); border-radius: 12px; box-shadow: hsl(180, 100%, 50%) 0px 0px 1px;"></div>',
+                    offset: new AMap.Pixel(-15, -15)
+                }))
+            } else {
+                // console.log(points[i].city)
+            }
+
+        }
+
+        addCluster();
+    }
+    
+    function addCluster() {
+        var sts = [{
+            url: "https://a.amap.com/jsapi_demos/static/images/blue.png",
+            size: new AMap.Size(32, 32),
+            offset: new AMap.Pixel(-16, -16)
+        }, {
+            url: "https://a.amap.com/jsapi_demos/static/images/green.png",
+            size: new AMap.Size(32, 32),
+            offset: new AMap.Pixel(-16, -16)
+        }, {
+            url: "https://a.amap.com/jsapi_demos/static/images/orange.png",
+            size: new AMap.Size(36, 36),
+            offset: new AMap.Pixel(-18, -18)
+        }, {
+            url: "https://a.amap.com/jsapi_demos/static/images/red.png",
+            size: new AMap.Size(48, 48),
+            offset: new AMap.Pixel(-24, -24)
+        }, {
+            url: "https://a.amap.com/jsapi_demos/static/images/darkRed.png",
+            size: new AMap.Size(48, 48),
+            offset: new AMap.Pixel(-24, -24)
+        }];
+        cluster = new AMap.MarkerClusterer(map, markers, {
+            styles: sts,
+            gridSize: 80
+        });
+    }
+
+    function _slicedToArray(e, n) {
+        return _arrayWithHoles(e) || _iterableToArrayLimit(e, n) || _nonIterableRest()
+    }
+    function _nonIterableRest() {
+        throw new TypeError("Invalid attempt to destructure non-iterable instance")
+    }
+    function _iterableToArrayLimit(e, n) {
+        if (Symbol.iterator in Object(e) || "[object Arguments]" === Object.prototype.toString.call(e)) {
+            var t = []
+                , o = !0
+                , i = !1
+                , r = void 0;
+            try {
+                for (var a, c = e[Symbol.iterator](); !(o = (a = c.next()).done) && (t.push(a.value),
+                    !n || t.length !== n); o = !0)
+                    ;
+            } catch (e) {
+                i = !0,
+                    r = e
+            } finally {
+                try {
+                    o || null == c.return || c.return()
+                } finally {
+                    if (i)
+                        throw r
+                }
+            }
+            return t
+        }
+    }
+    function _arrayWithHoles(e) {
+        if (Array.isArray(e))
+            return e
+    }
+</script>
+
+</html>

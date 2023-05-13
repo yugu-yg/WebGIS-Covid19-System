@@ -1,0 +1,201 @@
+
+html,
+body
+{
+     margin: 0;
+     padding: 0;
+}
+.container-fluid {
+    margin: 1px;
+    padding: 1px;
+}
+
+*{
+    margin:0;
+    padding: 0;
+}
+#nav{
+    width: 600px;
+    height: 50px;
+    margin: 0 auto;
+    background-color: #eee;
+    color: #fff;
+}
+ul{
+    list-style: none;
+}
+#nav ul li{
+    width:100px;
+    text-align: center;
+    line-height: 50px;
+    float: left;
+}
+#nav ul li ul li{
+    float:none;
+    background-color: #eee;
+    display:none;
+}
+#nav ul li a{
+    display:block;
+}
+#nav ul li a:hover{
+    background-color:#ee0;
+}
+#nav ul li:hover ul li{
+    display:block;
+}
+#BasemapToggle {
+    position: absolute;
+    right: 20px;
+    top: 20px;
+    z-index: 50;
+}
+
+#HomeButton {
+    left: 25px;
+    position: absolute;
+    top: 93px;
+    z-index: 50;
+}
+
+#LocateButton {
+    left: 25px;
+    position: absolute;
+    top: 130px;
+    z-index: 50;
+}
+
+#search {
+    display: block;
+    position: absolute;
+    z-index: 2;
+    top: 25px;
+    left: 75px;
+}
+.dropbtn {
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #f9f9f9;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 12px 16px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {background-color: #f1f1f1}
+
+.dropdown:hover .dropdown-content {
+    display: block;
+}
+
+.esriLargeSliderVertical {
+    height: 200px;
+    color: #0e10ff;
+}
+.esriLargeSliderTR {
+    left: 30px;
+    top: 135px;
+}
+.leftcurtain{
+    width: 50%;
+    height: 495px;
+    top: 0px;
+    left: 0px;
+    position: absolute;
+    z-index: 2;
+}
+.rightcurtain{
+    width: 51%;
+    height: 495px;
+    right: 0px;
+    top: 0px;
+    position: absolute;
+    z-index: 3;
+}
+
+.gaoliang {
+    border-radius: 10px;
+    -webkit-box-shadow: 0 0 5px rgba(0, 113, 241, 1);
+}
+
+.vceandimgcss{
+    position: absolute;
+    left: 3px;
+    top: 105px;
+    background-color:rgba(0,0,0,0)
+}
+.menuclass{
+    width: 100px;
+    height:650px;
+    top:105px;
+    display:none;"
+    background-color':'rgba(0,0,0,0.5)
+}
+.menubackground{'background-color':'white'}
+.menubackgroundout{'background-color':'rgba(0,0,0,0.5)'}
+.menudiv{position:absolute;text-align:center;width: 100px;height: 30px;background-color:rgba(0,0,0,0.2);}
+.menudivli{position:absolute;font-size:15px;color:#001c56;width: 100px;height: 30px;text-shadow: -1px -1px 1px #fff,1px 1px 1px #000}
+.POIdivli{position:absolute;font-size:15px;z-index:60;color:#fff;text-shadow: -2px -2px 2px #001c56,2px 2px 2px #000}
+
+.toolclass{
+    width: 100px;
+    height:450px;
+    left:1680px;
+    top:105px;
+}
+.toolclassbackgroundout{'background-color':'rgba(0,0,0,0.5)'}
+.classdiv{position:absolute;text-align:center;width: 100px;height: 30px;background-color:rgba(0,0,0,0.2);}
+.classdivli{position:absolute; font-size:15px;color: #001c56;width: 80px;height: 30px; text-shadow: -1px -1px 1px #fff,1px 1px 1px #001c56;}
+.shgismap_ruleLabel{
+    left:20px;top:100px;
+background-color:rgba(0,0,0,0.5)
+}
+.mapbox_onclickclass{
+    position:absolute;height:25px;top:5px;left:450px
+}
+.mapbox_onclick_onmouseoverclass{
+    position:absolute;height:35px;top:5px;left:444px
+}
+.mapbox_onclick_outmouseoverclass{
+    position:absolute;height:25px;top:5px;left:450px
+}
+·SHGIS_bus_search_title{
+    position:absolute;
+    left:15px;
+    top:120px;
+    font-size:42px;
+    z-index:60;
+    color: white;
+    text-shadow: -2px -2px 2px #001c56,2px 2px 2px #000;
+    display:none;
+}
+.SHGIS_bus_search_title_line{
+    position:absolute;float:left;top:140px;font-size: 2px;z-index:60;color: white;display:none;
+}
+.SHGIS_search_box{
+    position:absolute;text-align: center;width: 480px;height: 450px;border: 1px;left:50px;top:200px;background-color:rgba(0,0,0,0.2);display:none;
+}
+.SHGIS_searchresult_box{
+    position:absolute;text-align: center;width: 480px;height: 400px;border: 1px;left:50px;top:200px;background-color:rgba(0,0,0,0.2);display:none;
+}
+                                                                                                                                    .outSitescss{background-color:rgba(0,0,0,0.2)}
+.onSitesscss{background-color:white }
+.rope{position:absolute;top:5%;left:20px;z-index: 100;font-size:16px;color: #ff4f52;
+}

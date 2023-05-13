@@ -1,0 +1,265 @@
+﻿body {
+    font-family: 'Roboto', sans-serif;
+    overflow-y:hidden;
+    overflow-x:hidden
+}
+/* =============================================================
+   QUERY STYLES START
+ ============================================================ */
+/* =============================================================
+   HEADER SECTION STYLES
+ ============================================================ */
+.header {
+    /*background-image:url('/imgs/headerBK.png');*/
+    border-color: transparent;
+    height:60px
+}
+.header .dropdown{
+    float: right; 
+    margin-right:200px;
+    margin-top:5px
+}
+.header .dropdown > a {
+    position: relative;
+    display: block;
+    padding: 12px 14px;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    height: 50px;
+    width: 50px;
+    background-color: #6495ED;
+    /*color: #fff;*/
+}
+
+.header .dropdown-settings {
+    width: 200px;
+    padding: 10px;
+}
+.header .dropdown > a:hover,.header .dropdown > a:focus {
+    text-decoration: none;
+    background-color: #337AAD!important;
+}
+.header .dropdown-menu {
+    margin: 0px;
+    border-radius: 0px!important;
+    -moz-border-radius: 0px!important;
+    -webkit-border-radius: 0px!important;
+}
+
+.header .btn {
+    border-radius: 0px!important;
+    -moz-border-radius: 0px!important;
+    -webkit-border-radius: 0px!important;
+}
+
+.header .media-heading {
+    padding-top: 10px;
+}
+
+/* =============================================================
+   menu SECTION STYLES
+ ============================================================ */
+
+.menu-section {
+    background-color: #6495ED;
+}
+
+#menu a {
+    /*color: #FFF;*/
+    text-decoration: none;
+    font-weight: 500;
+    padding: 10px 10px 10px 10px;
+    text-transform: uppercase;
+}
+
+.menu-top-active {
+    background-color: #053C84;
+}
+
+.menu-section .nav > li > a:hover,.menu-section .nav > li > a:focus {
+    background-color: #053C84!important;
+}
+
+.navbar {
+    margin-bottom: 0px;
+}
+/* =============================================================
+   FOOTER SECTION STYLES
+ ============================================================ */
+.footer 
+{
+    text-align:center;
+    padding: 10px;
+    position: fixed;
+    width: 100%;
+    bottom: 0px;
+    height:30px;
+    /*color: #fff;*/
+    font-size: 12px;
+    background-color: #0D418A;
+}
+
+.footer a, .footer a:hover {
+    /*color: #fff;*/
+    text-decoration: none;
+}
+/* =============================================================
+   功能界面样式表
+ ============================================================ */
+#mapSearch {
+    cursor: pointer;
+    width: 50px;
+}
+#mapSearch:hover{
+    background-color:goldenrod;
+}
+#mapDiv{
+    height:100%;
+}
+.tool-container {
+    z-index: 900;
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    /*background: #fff;*/
+    box-shadow: 1px 2px 1px ;
+    height:34px;
+}
+.t-item {
+    padding: 0 15px;
+    position: relative;
+    float: left;
+}
+.tool-box>a {
+    overflow: hidden;
+    display: block;
+}
+a:-webkit-any-link {
+    color: -webkit-link;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.tool-gly {
+    float: left;
+    margin-right: 2px;
+    margin-top: 8px;
+}
+.lyricon {
+    float: left;
+    margin-right: 4px;
+    margin-top: 6px;
+}
+.tool-text {
+    float: left;
+    font-size: 12px;
+    font-style: normal;
+    color: #333;
+    height: 34px;
+    line-height: 34px;
+    display: inline-block;
+}
+.tool-ul 
+{
+    position: absolute;
+    width: 70px;
+    /*background: #fff;*/
+    top: 34px;
+    left: 0;
+    box-shadow: 1px 2px 1px rgba(0,0,0,.15);
+    padding:0;
+    margin:0;
+}
+li{
+    list-style:none;
+}
+.tool-icon 
+{
+    float: left;
+    margin-left: 15px;
+    margin-top: 5px;
+    margin-right: 6px;
+}
+.t-item:not(:last-child):after {
+    content: "";
+    display: block;
+    visibility: visible;
+    width: 1px;
+    height: 21px;
+    /*background: #eee;*/
+    position: absolute;
+    top: 7px;
+    right: -1px;
+}
+.tool-item:hover .tool-text {
+    color: #2f87eb;
+}
+.item:hover .tool-text {
+    color: #2f87eb;
+}
+.tool-lyr
+{
+    position: absolute;
+    width: 240px;
+    height: 180px;
+    background: #fff;
+    top: 34px;
+    left: 0;
+    box-shadow: 1px 2px 1px rgba(0,0,0,.15);
+    padding:0;
+    margin:0;  
+}
+.roadnet
+{
+    z-index: 900;
+    position: absolute;
+    opacity: 0;
+    border-radius: 3px;
+    width:70px;
+    height:34px;
+    right: 340px;
+    top: 20px;
+    background: #fff;
+    box-shadow: 1px 2px 1px rgba(0,0,0,.15);
+    cursor: pointer;
+}
+/* =============================================================
+   查询结果面板样式表
+ ============================================================ */
+#resultPanel .panel-ps-body a:hover {
+    color: #FF3300;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+#resultPanel thead {
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#40546D), to(#3A4660));
+    background: -moz-linear-gradient(top, #40546D, #3A4660);
+    background: -ms-linear-gradient(top, #40546D,#3A4660);
+    color: white;
+}
+.panel-ps-header {
+    margin-bottom: 5px;
+    letter-spacing: 0.3px;
+    min-height: 32px;
+    line-height: 32px;
+    background: -webkit-gradient(linear, 0 0, 0 100%, from(#FAFCFB), to(#DCDFE4));
+    background: -moz-linear-gradient(top, #FAFCFB, #DCDFE4);
+    background: -ms-linear-gradient(top, #FAFCFB,#DCDFE4);
+}
+.panel-ps-header > span {
+    padding-left: 20px;
+    color: #737373;
+    font-size: 18px;
+    min-height: 200px;
+    text-shadow: -1px -1px #fff, 1px 1px #333;
+}
+.panel-ps 
+{
+    border: 1px solid rgba(33, 33, 33, 0.6);
+    background-color: #FFFFFF;
+    box-shadow: 10px 10px 5px #888888;
+}
+/* =============================================================
+   QUERY STYLES END
+ ============================================================ */
